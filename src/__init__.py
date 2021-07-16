@@ -4,6 +4,15 @@
 # in your project if you use it! (Preferably as a small note
 # in your game.)
 
+# Please also note, don't use this code as a python tutorial!
+# It breaks many many many rules of python, including private
+# and protected attribute rules. But I do it because I find
+# Python's lack of true private, & especially internal (C#)
+# method support. So I cheat. Don't do what I do. Please.
+# It's not good python.
+# It works though. And if you're just using the PGS you won't
+# notice anything off, it follows PEP-8 when you're using the PGS.
+
 import os as __os
 import clr as __clr
 import sys as __sys
@@ -13,6 +22,8 @@ __clr.AddReference("PGS")
 import Microsoft.Xna.Framework as _mg
 import Microsoft.Xna.Framework.Graphics as _mgGraphics
 import Microsoft.Xna.Framework.Input as _mgInput
+from System import Array as _array
+from System.Collections.Generic import List as _list
 import PRS as _prs
 import abc as _abc
 from enum import Enum as _enum
@@ -28,6 +39,10 @@ class Vector2:
         return Vector2(1, 1)
 
     def __init__(self, x: float, y: float):
+        #if (type(x) != float and type(x) != int):
+        #    raise TypeError(f"Argument 'x' expected type 'float', got '{type(x).__name__}' instead.")
+        #if (type(y) != float and type(y) != int):
+        #    raise TypeError(f"Argument 'y' expected type 'float', got '{type(x).__name__}' instead.")
         self.x: float = x
         self.y: float = y
 
@@ -297,7 +312,25 @@ class Colors:
 
 class Texture:
     def __init__(self, path: str):
-        self._texture = _mgGraphics.Texture2D.FromFile(_GameBackend.graphics_device, path)
+        if (path == "CUSTOM"):
+            self._texture = None
+        else:
+            try:
+                self._texture = _mgGraphics.Texture2D.FromFile(_GameBackend.graphics_device, path)
+            except:
+                raise AttributeError("Path cannot be an empty string." if path == "" else "Could not find file with the given path.")
+
+    @staticmethod
+    def custom(width: int, height: int):
+        tex = Texture("CUSTOM")
+        tex._texture = _mgGraphics.Texture2D(_GameBackend.graphics_device, width, height)
+        return tex
+
+    def set_data(self, data: list[Color]):
+        colors = _list[_mg.Color]()
+        for i in range(len(data)):
+            colors.Add(_mg.Color(data[i].r, data[i].g, data[i].b, data[i].a))
+        self._texture.SetData[_prs.Utils.GetColorArrayType()](colors.ToArray())
 
 class SpriteBase(_abc.ABC):
     def __init__(self):
@@ -361,13 +394,17 @@ class DrawError(Exception):
 class _GameBackend(_prs.PGSGame):
     graphics_device = None
 
-    def __init__(self, game, width: int, height: int, title: str):
+    def __init__(self, game, width: int, height: int, title: str, show_credits: bool):
         self.game: Game = game
         self.graphics: _mg.GraphicsDeviceManager = _mg.GraphicsDeviceManager(self)
         self.graphics.PreferredBackBufferWidth = width
         self.graphics.PreferredBackBufferHeight = height
-        self.Window.Title = title
+        self.titleText = title
+        self.show_credits = show_credits
+        self.Window.Title = self.titleText + " - Python Graphics Set - FPS: " if self.show_credits else self.titleText
         self.IsMouseVisible = True
+        if (self.show_credits):
+            print("Hello from the Python Graphics Set community!\nhttps://github.com/ohtrobinson/PGS")
 
         self.InitializeEvent += self.initialize
         self.UpdateEvent += self.update
@@ -376,6 +413,7 @@ class _GameBackend(_prs.PGSGame):
         self.Window.KeyDown += Input._set_key_down
         self.Window.KeyUp += Input._set_key_up
         self.clear_color = _mg.Color(0, 0, 0)
+        self.counter = 0
 
     def initialize(self):
         _GameBackend.graphics_device = self.GraphicsDevice
@@ -384,6 +422,9 @@ class _GameBackend(_prs.PGSGame):
     def update(self, gameTime):
         Input._update()
         Time._update(gameTime)
+        if (Time.elapsed_milliseconds() - self.counter > 1000):
+            self.counter = Time.elapsed_milliseconds()
+            self.Window.Title = self.titleText + " - Python Graphics Set - FPS: " + str(Time.fps()) if self.show_credits else self.titleText
         self.game.update()
 
     def draw(self):
@@ -400,8 +441,15 @@ class Game:
     def clear_color(self, value: Color):
         self.__game.clear_color = _mg.Color(value.r, value.g, value.b)
 
-    def __init__(self, width: int, height: int, title: str = "PGS Window"):
-        self.__game: _GameBackend = _GameBackend(self, width, height, title)
+    def __init__(self, width: int, height: int, title: str = "PGS Window", show_credits = True):
+        """
+        Create a new instance of the Game class. This will in turn create a window, which will launch once 'run()' is called.
+        :param width: The width, in pixels, of the game window.
+        :param height: The height, in pixels, of the game window.
+        :param title: The title, if any, of the game window.
+        :param show_credits: Whether the PGS should show "Python Graphics Set" in the title, and the "Hello!" message on launch. Leave this set to 'True' if you want to show some support!
+        """
+        self.__game: _GameBackend = _GameBackend(self, width, height, title, show_credits)
         self.clear_color = Colors.BLACK
 
     def initialize(self):
@@ -414,7 +462,10 @@ class Game:
         pass
 
     def run(self):
+        #try:
         self.__game.Run()
+        #except Exception as e:
+        #    raise Exception(f"UNKNOWN ERROR OCCURRED.\n\n{e}\n\nPlease leave this message as an issue on the github, so it can either be fixed, or the appropriate error can get raised! Thank you! :)")
 
     def exit(self):
         self.__game.Exit()
@@ -513,6 +564,8 @@ class Input:
 class Time:
     __frames = 0
     __game_time = None
+    __counter = 0
+    __fps = 0
 
     @staticmethod
     def delta_time() -> float:
@@ -527,6 +580,18 @@ class Time:
         return Time.__frames
 
     @staticmethod
+    def fps_precise() -> float:
+        return Time.__fps
+
+    @staticmethod
+    def fps() -> int:
+        return int(Time.__fps)
+
+    @staticmethod
     def _update(game_time):
         Time.__frames += 1
         Time.__game_time = game_time
+
+        if Time.elapsed_milliseconds() - Time.__counter >= 1000:
+            Time.__counter = Time.elapsed_milliseconds()
+            Time.__fps = Time.total_frames() / (Time.elapsed_milliseconds() / 1000)
