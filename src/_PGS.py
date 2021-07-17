@@ -13,21 +13,23 @@
 # It works though. And if you're just using the PGS you won't
 # notice anything off, it follows PEP-8 when you're using the PGS.
 
-import os as __os
+import os as _os
 import clr as __clr
 import sys as __sys
-__sys.path.append(__os.path.dirname(__file__) + "/lib")
+__sys.path.append(_os.path.dirname(__file__) + "/lib")
 __clr.AddReference("MonoGame.Framework")
 __clr.AddReference("PGS")
 __clr.AddReference("FontStashSharp.Monogame")
 import Microsoft.Xna.Framework as _mg
 import Microsoft.Xna.Framework.Graphics as _mgGraphics
 import Microsoft.Xna.Framework.Input as _mgInput
-from System import Array as _array
+import FontStashSharp as _fontStash
 from System import TimeSpan as _timeSpan
-from System.Collections.Generic import List as _list
+from System.IO import File as _file
+from System.IO import Path as _path
 import PRS as _prs
 import abc as _abc
+import math as _math
 from enum import Enum as _enum
 
 class Vector2:
@@ -49,36 +51,32 @@ class Vector2:
         self.y: float = y
 
     def __add__(self, other: 'Vector2') -> 'Vector2':
-        self.x += other.x
-        self.y += other.y
-        return self
+        return Vector2(self.x + other.x, self.y + other.y)
 
     def __sub__(self, other: 'Vector2') -> 'Vector2':
-        self.x -= other.x
-        self.y -= other.y
-        return self
+        return Vector2(self.x - other.x, self.y - other.y)
 
     def __mul__(self, other) -> 'Vector2':
         if type(other) == Vector2:
-            self.x *= other.x
-            self.y *= other.y
+            return Vector2(self.x * other.x, self.y * other.y)
         elif type(other) == float or type(other) == int:
-            self.x *= other
-            self.y *= other
+            return Vector2(self.x * other, self.y * other)
         else:
             raise TypeError(f"unsupported operand type(s) for *: 'Vector2' and '{type(other).__name__}'")
-        return self
+
+    def __rmul__(self, other) -> 'Vector2':
+        if (type(other) != Vector2 and type(other) != int and type(other) != float):
+            raise TypeError(f"unsupported operand type(s) for *: '{type(other).__name__}' and 'Vector2'")
+        else:
+            return self * other
 
     def __truediv__(self, other) -> 'Vector2':
         if type(other) == Vector2:
-            self.x /= other.x
-            self.y /= other.y
+            return Vector2(self.x / other.x, self.y / other.y)
         elif type(other) == float or type(other) == int:
-            self.x /= other
-            self.y /= other
+            return Vector2(self.x / other, self.y / other)
         else:
             raise TypeError(f"unsupported operand type(s) for /: 'Vector2' and '{type(other).__name__}'")
-        return self
 
     def __floordiv__(self, other) -> 'Vector2':
         vec: Vector2 = self / other
@@ -364,6 +362,15 @@ class Sprite(SpriteBase):
         self.texture: Texture = texture
         self.position: Vector2 = position
 
+    @staticmethod
+    def from_sprite(sprite: 'Sprite'):
+        new_sprite = Sprite(sprite.texture, sprite.position)
+        new_sprite.origin = sprite.origin
+        new_sprite.color = sprite.color
+        new_sprite.scale = sprite.scale
+        new_sprite.rotation = sprite.rotation
+        return new_sprite
+
     def _draw(self, spriteBatch):
         spriteBatch.Draw(self.texture._texture, _mg.Vector2(float(self.position.x), float(self.position.y)), None,
             _mg.Color(self.color.r, self.color.g, self.color.b, self.color.a), float(self.rotation),
@@ -402,6 +409,12 @@ class SpriteDrawer:
             raise DrawError("You must call 'start()' before you can draw to the screen.")
         sprite._draw(self.__spriteBatch)
 
+    def draw_text(self, font_name: str, font_size: int, text: str, position: Vector2, color: Color = Colors.WHITE, origin: Vector2 = Vector2.zero()):
+        _FontManager.get_font(font_name, font_size).DrawText(self.__spriteBatch, text,
+                                                             _mg.Vector2(float(position.x), float(position.y)),
+                                                             _mg.Color(color.r, color.g, color.b, color.a),
+                                                             _mg.Vector2.One, 0.0, _mg.Vector2(float(origin.x), float(origin.y)))
+
     def add_static(self, sprite_name: str, sprite: SpriteBase):
         self.__statics[sprite_name] = sprite
 
@@ -422,6 +435,21 @@ class SpriteDrawer:
 
 class DrawError(Exception):
     pass
+
+class _FontManager:
+    __fonts: dict[str, _fontStash.FontSystem] = {}
+
+    @staticmethod
+    def get_font(name: str, size: int):
+        if not name in _FontManager.__fonts:
+            settings: _fontStash.FontSystemSettings = _fontStash.FontSystemSettings()
+            settings.TextureWidth = 1024
+            settings.TextureHeight = 1024
+            system: _fontStash.FontSystem = _fontStash.FontSystem(settings)
+            system.AddFont(_file.ReadAllBytes(_os.path.dirname(__file__) + f"/lib/Fonts/{name}.ttf"))
+            _FontManager.__fonts[name] = system
+        return _FontManager.__fonts[name].GetFont(size)
+
 
 class _GameBackend(_prs.PGSGame):
     graphics_device = None
@@ -526,6 +554,39 @@ class Game:
     def exit(self):
         self.__game.Exit()
 
+
+class PGSMath:
+    @staticmethod
+    def pi():
+        return 3.1415926535897931
+
+    @staticmethod
+    def degrees_to_radians(degrees: float) -> float:
+        return degrees * (PGSMath.pi() / 180)
+
+    @staticmethod
+    def radians_to_degrees(radians: float) -> float:
+        return radians * (180 / PGSMath.pi())
+
+    @staticmethod
+    def clamp(value: float, min: float, max: float) -> float:
+        if value <= min:
+            return min
+        elif value >= max:
+            return max
+        else:
+            return value
+
+    @staticmethod
+    def max(value1: float, value2: float) -> float:
+        return value1 if value1 > value2 else value2
+
+    @staticmethod
+    def min(value1: float, value2: float) -> float:
+        return value1 if value1 < value2 else value2
+
+
+
 class Keys(_enum):
     K_ENTER = 13
     K_ESCAPE = 27
@@ -604,6 +665,10 @@ class Input:
         return button in Input.__mouse_buttons_held
 
     @staticmethod
+    def mouse_button_up(button: MouseButtons) -> bool:
+        return not Input.mouse_button_down(button)
+
+    @staticmethod
     def mouse_position() -> Vector2:
         return Vector2(Input.__mouse_state.X, Input.__mouse_state.Y)
 
@@ -646,9 +711,12 @@ class Input:
 
     @staticmethod
     def __key_up(key: Keys):
-        Input.__keys_held.remove(key)
-        if key in Input.__new_keys_this_frame:
-            Input.__new_keys_this_frame.remove(key)
+        try:
+            Input.__keys_held.remove(key)
+            if key in Input.__new_keys_this_frame:
+                Input.__new_keys_this_frame.remove(key)
+        except Exception as e:
+            print(e)
 
     @staticmethod
     def __mouse_down(button: MouseButtons):
