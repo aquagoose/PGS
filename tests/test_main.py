@@ -1,24 +1,19 @@
 from src import *
+from src.UI import *
 
 
 class Test(Game):
     def initialize(self):
-        self.sprite_drawer = SpriteDrawer()
-        self.texture = Texture.custom(200, 100)
-        colors = []
-        for i in range(200 * 100):
-            colors.append(Colors.WHITE)
-        self.texture.set_data(colors)
-        pass
+        self.ui_manager = UIManager(SpriteDrawer())
+        self.ui_manager.add_element("test", FillRectangle(self.ui_manager, Vector2(100, 150), Size(200, 100), Colors.GRAY))
+        self.ui_manager.add_element("test", BorderRectangle(self.ui_manager, Vector2(100, 150), Size(200, 100), 5, Colors.WHITE))
 
     def update(self):
-        pass
+        self.ui_manager.update()
 
     def draw(self):
-        self.sprite_drawer.start()
-        self.sprite_drawer.draw_texture(self.texture, Vector2(100, 100))
-        self.sprite_drawer.end()
-        pass
+        self.ui_manager.draw()
+
 
 
 if __name__ == "__main__":

@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace PRS
 {
     public static class PGSUtils
     {
-        public static Type GetColorArrayType()
+        public static void SetTexturePixels(ref Texture2D targetTexture, Color[] colors)
         {
-            return typeof(Color[]);
+            targetTexture.SetData(colors);
         }
     }
 }
