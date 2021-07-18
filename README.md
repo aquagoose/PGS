@@ -1,4 +1,6 @@
 # Python Graphics Set
+For update announcements, special events, and more, [join our discord server!](https://discord.gg/FZt33pNkAp)
+
 The Python Graphics Set is an easy way to create complex games in Python.
 ![Racing Game sample](https://rollbot.net/wp-content/uploads/2021/07/pgs-sample-image.png)
 

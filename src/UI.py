@@ -179,7 +179,8 @@ class Label(UIElement):
         self.font: str = font
 
     def draw(self):
-        self._sprite_drawer.draw_text(self.font, self.font_size, self.text, self.position.screen_position, self.color, self.origin)
+        if self.visible:
+            self._sprite_drawer.draw_text(self.font, self.font_size, self.text, self.position.screen_position, self.color, self.origin)
 
 
 class Button(UIElement):
@@ -206,35 +207,37 @@ class Button(UIElement):
         self.on_click: _callable = lambda: None
 
     def update(self, mouse_taken: bool) -> bool:
-        mouse_taken = super().update(mouse_taken)
+        if self.visible:
+            mouse_taken = super().update(mouse_taken)
 
-        if self._hovering:
-            self.__background.color = self.__hover_color
-            if _p.Input.mouse_button_down(_p.MouseButtons.M_LEFT):
-                self.__background.color = self.__click_color
-                if not self.__pressed:
-                    self.__pressed = True
-                    if not self.execute_on_release:
-                        self.on_click()
-            elif self.execute_on_release and _p.Input.mouse_button_up(_p.MouseButtons.M_LEFT) and self.__pressed:
-                self.on_click()
-                self.__pressed = False
+            if self._hovering:
+                self.__background.color = self.__hover_color
+                if _p.Input.mouse_button_down(_p.MouseButtons.M_LEFT):
+                    self.__background.color = self.__click_color
+                    if not self.__pressed:
+                        self.__pressed = True
+                        if not self.execute_on_release:
+                            self.on_click()
+                elif self.execute_on_release and _p.Input.mouse_button_up(_p.MouseButtons.M_LEFT) and self.__pressed:
+                    self.on_click()
+                    self.__pressed = False
+                else:
+                    self.__pressed = False
             else:
+                self.__background.color = self.__back_color
                 self.__pressed = False
-        else:
-            self.__background.color = self.__back_color
-            self.__pressed = False
 
-        self.__background.position = self.position
-        self.__background.update(mouse_taken)
-        self.__border.position = self.position
-        self.__border.update(mouse_taken)
-        self.__text.position = Position.from_xy(self.position.x + self.size.width / 2, self.position.y + self.size.height / 2)
-        self.__text.update(mouse_taken)
+            self.__background.position = self.position
+            self.__background.update(mouse_taken)
+            self.__border.position = self.position
+            self.__border.update(mouse_taken)
+            self.__text.position = Position.from_xy(self.position.x + self.size.width / 2, self.position.y + self.size.height / 2)
+            self.__text.update(mouse_taken)
 
-        return mouse_taken
+            return mouse_taken
 
     def draw(self):
-        self.__background.draw()
-        self.__border.draw()
-        self.__text.draw()
+        if self.visible:
+            self.__background.draw()
+            self.__border.draw()
+            self.__text.draw()

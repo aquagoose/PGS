@@ -90,6 +90,11 @@ class Vector2:
     def __str__(self):
         return f"Vector2(x: {self.x}, y: {self.y})"
 
+    @staticmethod
+    def lerp(value1: 'Vector2', value2: 'Vector2', amount: float) -> 'Vector2':
+        lerp_val = _mg.Vector2.Lerp(_mg.Vector2(float(value1.x), float(value1.y)), _mg.Vector2(float(value2.x), float(value2.y)), float(amount))
+        return Vector2(lerp_val.X, lerp_val.Y)
+
 class Size:
     def __init__(self, width: int, height: int):
         self.width: int = width
@@ -536,6 +541,9 @@ class Game:
     def initialize(self):
         pass
 
+    def unload(self):
+        pass
+
     def update(self):
         pass
 
@@ -552,6 +560,7 @@ class Game:
         #    raise Exception(f"UNKNOWN ERROR OCCURRED.\n\n{e}\n\nPlease leave this message as an issue on the github, so it can either be fixed, or the appropriate error can get raised! Thank you! :)")
 
     def exit(self):
+        self.unload()
         self.__game.Exit()
 
 
@@ -584,6 +593,10 @@ class PGSMath:
     @staticmethod
     def min(value1: float, value2: float) -> float:
         return value1 if value1 < value2 else value2
+
+    @staticmethod
+    def lerp(value1: float, value2: float, amount: float) -> float:
+        return value1 + amount * (value2 - value1)
 
 
 
