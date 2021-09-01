@@ -1,3 +1,5 @@
+import datetime
+
 from src import *
 from src.UI import *
 import math
@@ -128,6 +130,7 @@ class MainScene(Scene):
 
         self.starting_time = Time.elapsed_milliseconds()
         self.lerp_time = None
+        self.cam_speed_mult = 0
 
     def update(self):
         if self.should_reload:
@@ -150,7 +153,7 @@ class MainScene(Scene):
 
         # lol... spawns a new car every frame. uncomment for a laugh
         #for i in range(1):
-        #    self.cars.append(Car(Sprite(self.car_texture, Vector2(self.window_size.width + 100 + self.camera.position.x, r(115, 610)))))
+        #    self.cars.append(Car(Sprite(self.car_texture, Vector2(self.game.window_size.width + 100 + self.camera.position.x, r(115, 610)))))
 
         for car in self.cars:
             car.update(self.camera.position)
@@ -163,6 +166,8 @@ class MainScene(Scene):
                 car.has_added = True
             if car.destroy:
                 self.cars.remove(car)
+        if Input.key_pressed(Keys.K_SPACE):
+            self.points = -50
         if self.points < 0:
             if self.lerp_time is None:
                 self.lerp_time = Time.elapsed_milliseconds()
@@ -178,15 +183,18 @@ class MainScene(Scene):
                 self.menu_button.visible = True
             self.car.game_over = True
             self.car.velocity -= PlayerCar.BRAKING * Time.delta_time()
-            delta = PGSMath.clamp((Time.elapsed_milliseconds() - self.lerp_time) / 1000 / 3, 0, 1)
+            delta = PGSMath.clamp((Time.elapsed_milliseconds() - self.lerp_time) / 1000 / 2, 0, 1)
+            ease_delta = (1 - (1 - delta) * (1 - delta))
             current_camera_pos = self.camera.position
-            self.camera.position = Vector2.lerp(current_camera_pos, self.car.sprite.position - Vector2(1280, 720) / 2, delta)
+            self.camera.position = Vector2.lerp(current_camera_pos, self.car.sprite.position - Vector2(1280, 720) / 2, ease_delta)
             current_camera_origin = self.camera.origin
-            self.camera.origin = Vector2.lerp(current_camera_origin, Vector2(1280, 720) / 2, delta)
+            self.camera.origin = Vector2.lerp(current_camera_origin, Vector2(1280, 720) / 2, ease_delta)
             ##self.camera.origin = Vector2(1280, 720) / 2
-            self.camera.zoom = PGSMath.lerp(1, 1.5, delta)
+            self.camera.zoom = PGSMath.lerp(1, 1.5, ease_delta)
             if delta >= 1:
-                self.camera.rotation += 0.1 * Time.delta_time()
+                self.cam_speed_mult += 1 * Time.delta_time()
+                self.cam_speed_mult = PGSMath.clamp(self.cam_speed_mult, 0, 1)
+                self.camera.rotation += (0.1 * Time.delta_time()) * self.cam_speed_mult
 
         self.ui_manager.update()
 
@@ -217,13 +225,13 @@ class Entity:
 
 
 class PlayerCar(Entity):
-    SPEED = 2000
+    SPEED = 200000
     ACCELERATION = 200
     DECELERATION = 100
     BRAKING = 500
     TURN_SPEED = 1.2
 
-    SPEED_IN_KMH = 300
+    SPEED_IN_KMH = 30000
 
     @property
     def speed_in_kmh(self) -> float:
