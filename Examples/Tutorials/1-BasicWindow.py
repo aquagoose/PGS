@@ -31,6 +31,6 @@ class BasicWindow(Game):
 
 if __name__ == "__main__":
     # Create a new instance of our game, with the given resolution and title.
-    window = BasicWindow(1280, 720, "Basic Window Example")
+    window = BasicWindow(1280, 720, "Basic Window")
     # Run our game!
     window.run()

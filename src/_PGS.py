@@ -382,6 +382,10 @@ class Sprite(SpriteBase):
             _mg.Vector2(float(self.origin.x), float(self.origin.y)), _mg.Vector2(float(self.scale.x), float(self.scale.y)),
             _mgGraphics.SpriteEffects(0), float(0))
 
+class PixelMode(_enum):
+    Linear = 0
+    Clamp = 1
+
 class SpriteDrawer:
     def __init__(self):
         self.__spriteBatch = _mgGraphics.SpriteBatch(_GameBackend.graphics_device)
@@ -389,10 +393,12 @@ class SpriteDrawer:
         self.__dynamics: dict = {}
         self.__begin: bool = False
 
-    def start(self, transform_matrix: Matrix = Matrix.identity()):
+    def start(self, transform_matrix: Matrix = Matrix.identity(), pixel_mode: PixelMode = PixelMode.Linear):
         if self.__begin:
             raise DrawError("You must call 'end()' first, before you can call 'start()' again.")
-        self.__spriteBatch.Begin(_mgGraphics.SpriteSortMode.Deferred, None, None, None, None, None, transform_matrix._to_mg_matrix());
+        self.__spriteBatch.Begin(_mgGraphics.SpriteSortMode.Deferred, None,
+                                 _mgGraphics.SamplerState.LinearClamp if pixel_mode == PixelMode.Linear else _mgGraphics.SamplerState.PointClamp,
+                                 None, None, None, transform_matrix._to_mg_matrix());
         self.__begin = True
 
     def end(self):
