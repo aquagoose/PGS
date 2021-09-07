@@ -772,6 +772,7 @@ class Time:
     __game_time = None
     __counter = 0
     __fps = 0
+    __frames_since_last_second = 0
 
     @staticmethod
     def delta_time() -> float:
@@ -797,7 +798,9 @@ class Time:
     def _update(game_time):
         Time.__frames += 1
         Time.__game_time = game_time
+        Time.__frames_since_last_second += 1
 
         if Time.elapsed_milliseconds() - Time.__counter >= 1000:
             Time.__counter = Time.elapsed_milliseconds()
-            Time.__fps = Time.total_frames() / (Time.elapsed_milliseconds() / 1000)
+            Time.__fps = Time.__frames_since_last_second
+            Time.__frames_since_last_second = 0

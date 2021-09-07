@@ -14,6 +14,14 @@ The Python Graphics Set includes:
 
 Please note that features in strikethrough have not yet been integrated, however are being planned.
 
+## Addons
+Designing addons to the PGS is easy. The API is designed to be interfaced with, and you can even directly interact with the backend elements if you so desire.
+
+There are some addons built in already:
+* **PGS.UI** - An easy-to-use UI library that's ready for you to use.
+* **PGS.Scenes** - An easy way to get scenes working in your game (currently unfinished)
+* **PGS.OpenGL** - An OpenGL renderer version of the PGS, currently WIP, will eventually replace the main PGS version once complete.
+
 ## FAQ
 
 ### Who is the PGS for?
