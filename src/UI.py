@@ -44,6 +44,10 @@ class UIManager:
         self.__ui_elements[element_name] = element
         self.__reverse_elements()
 
+    def clear_elements(self):
+        self.__ui_elements.clear()
+        self.__reversed_ui_elements.clear()
+
     def __reverse_elements(self):
         self.__reversed_ui_elements.clear()
         for i in range(len(self.__ui_elements) - 1, -1, -1):

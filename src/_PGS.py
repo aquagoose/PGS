@@ -465,7 +465,7 @@ class _FontManager:
 class _GameBackend(_prs.PGSGame):
     graphics_device = None
 
-    def __init__(self, game, width: int, height: int, title: str, show_credits: bool, vsync: bool):
+    def __init__(self, game, width: int, height: int, title: str, show_credits: bool, vsync: bool, resizable: bool):
         self.game: Game = game
         self.graphics: _mg.GraphicsDeviceManager = _mg.GraphicsDeviceManager(self)
         self.graphics.PreferredBackBufferWidth = width
@@ -474,6 +474,7 @@ class _GameBackend(_prs.PGSGame):
         self.show_credits = show_credits
         self.Window.Title = self.titleText + " - Python Graphics Set - FPS: " if self.show_credits else self.titleText
         self.IsMouseVisible = True
+        self.Window.AllowUserResizing = resizable
         if (self.show_credits):
             print("Hello from the Python Graphics Set community!\nhttps://github.com/ohtrobinson/PGS")
 
@@ -533,7 +534,8 @@ class Game:
         self.__game.graphics.PreferredBackBufferWidth = size.width
         self.__game.graphics.PreferredBackBufferHeight = size.height
 
-    def __init__(self, width: int, height: int, title: str = "PGS Window", show_credits = True, vsync: bool = True):
+    def __init__(self, width: int, height: int, title: str = "PGS Window", show_credits = True, vsync: bool = True,
+                 resizable: bool = False):
         """
         Create a new instance of the Game class. This will in turn create a window, which will launch once 'run()' is called.
         :param width: The width, in pixels, of the game window.
@@ -541,7 +543,7 @@ class Game:
         :param title: The title, if any, of the game window.
         :param show_credits: Whether the PGS should show "Python Graphics Set" in the title, and the "Hello!" message on launch. Leave this set to 'True' if you want to show some support!
         """
-        self.__game: _GameBackend = _GameBackend(self, width, height, title, show_credits, vsync)
+        self.__game: _GameBackend = _GameBackend(self, width, height, title, show_credits, vsync, resizable)
         self.clear_color = Colors.BLACK
 
     def initialize(self):
