@@ -487,6 +487,7 @@ class _GameBackend(_prs.PGSGame):
 
         self.Window.KeyDown += Input._set_key_down
         self.Window.KeyUp += Input._set_key_up
+        self.Window.ClientSizeChanged += self.__resize
         self.clear_color = _mg.Color(0, 0, 0)
         self.counter = 0
 
@@ -506,6 +507,8 @@ class _GameBackend(_prs.PGSGame):
         self.GraphicsDevice.Clear(self.clear_color)
         self.game.draw()
 
+    def __resize(self):
+        print(self.GraphicsDevice.)
 
 class Game:
     @property

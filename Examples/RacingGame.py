@@ -2,8 +2,11 @@ from src import *
 from src.UI import *
 import math
 
+REFERENCE_RESOLUTION = Size(1280, 720)
 
 class RacingGame(Game):
+    screen_size: Size = Size(0, 0)
+
     def initialize(self):
         # Initialize our sprite drawer & UI manager here. These will be shared throughout the scenes.
         self.sprite_drawer = SpriteDrawer()
@@ -16,6 +19,8 @@ class RacingGame(Game):
         # Set the current scene to the Load Assets scene.
         self.current_scene: Scene = LoadAssetsScene(self)
         self.current_scene.initialize()
+
+        RacingGame.screen_size = self.screen_size
 
     def update(self):
         self.current_scene.update()
@@ -58,7 +63,8 @@ class LoadAssetsScene(Scene):
     def draw(self):
         if self.has_one_frame_been_processed:
             self.load_assets()
-            self.game.change_scene(MenuScene(self.game))
+            #self.game.change_scene(MenuScene(self.game))
+            self.game.change_scene(MainScene(self.game))
         else:
             self.has_one_frame_been_processed = True
 
@@ -87,15 +93,19 @@ class MainScene(Scene):
         self.game.clear_color = Colors.BLACK
         self.camera: Camera = Camera(Vector2.zero(), -self.game.window_size.to_vector2() / 2)
 
-        self.player = Player(Sprite(self.game.assets["racecar"], Vector2(0, 0)))
+        self.player = Player(Sprite(self.game.assets["racecar"], Vector2(100, 0)))
+
+        self.highway: Highway = Highway(Sprite(self.game.assets["highway"], Vector2(0, 0)))
 
     def update(self):
+        self.highway.update()
         self.player.update()
-        self.camera.rotation += 0.5 * Time.delta_time()
+        self.camera.position = Vector2(self.player.sprite.position.x + REFERENCE_RESOLUTION.width / 2 - 100, 0)
 
     def draw(self):
         self.sprite_drawer.start(self.camera.transform_matrix)
 
+        self.highway.draw(self.sprite_drawer)
         self.player.draw(self.sprite_drawer)
 
         self.sprite_drawer.end()
@@ -122,10 +132,10 @@ class Camera:
     @property
     def transform_matrix(self) -> Matrix:
         transform: Matrix = Matrix.transform(-self.position - self.origin)
-        transform *= Matrix.transform(-self.origin)
+        transform *= Matrix.transform(self.origin)
         transform *= Matrix.scale(Vector2(self.zoom, self.zoom))
         transform *= Matrix.rotate(self.rotation)
-        transform *= Matrix.transform(self.origin)
+        transform *= Matrix.transform(-self.origin)
         return transform
 
 
@@ -166,6 +176,13 @@ class Player(Entity):
 
     def draw(self, sprite_drawer: SpriteDrawer):
         sprite_drawer.draw_sprite(self.sprite)
+
+
+class Highway(Entity):
+    def __init__(self, sprite: Sprite):
+        super().__init__(sprite)
+        self.sprite.rotation = PGSMath.degrees_to_radians(90)
+        self.sprite.origin = Vector2(self.sprite.texture.size.width / 2, self.sprite.texture.size.height)
 
 
 if __name__ == "__main__":
