@@ -476,7 +476,7 @@ class _GameBackend(_prs.PGSGame):
         self.IsMouseVisible = True
         self.Window.AllowUserResizing = resizable
         if (self.show_credits):
-            print("Hello from the Python Graphics Set community!\nhttps://github.com/ohtrobinson/PGS")
+            print("Hey there, from the Python Graphics Set!\nhttps://github.com/ohtrobinson/PGS")
 
         self.InitializeEvent += self.initialize
         self.UpdateEvent += self.update
@@ -492,6 +492,11 @@ class _GameBackend(_prs.PGSGame):
         self.counter = 0
 
     def initialize(self):
+        # TODO: Enable MSAA
+        #self.graphics.GraphicsProfile = _mgGraphics.GraphicsProfile.HiDef;
+        #self.graphics.PreferMultiSampling = False
+        #self.GraphicsDevice.PresentationParameters.MultiSampleCount = 32
+        #self.graphics.ApplyChanges()
         _GameBackend.graphics_device = self.GraphicsDevice
         self.game.initialize()
 
@@ -507,8 +512,10 @@ class _GameBackend(_prs.PGSGame):
         self.GraphicsDevice.Clear(self.clear_color)
         self.game.draw()
 
-    def __resize(self):
-        print(self.GraphicsDevice.)
+    def __resize(self, sender, args):
+        #self.graphics.PreferredBackBufferWidth = self.Window.ClientBounds.Width
+        #self.graphics.PreferredBackBufferHeight = self.Window.ClientBounds.Width
+        self.game.resize()
 
 class Game:
     @property
@@ -559,6 +566,9 @@ class Game:
         pass
 
     def draw(self):
+        pass
+
+    def resize(self):
         pass
 
     def run(self, target_fps: int = None):
