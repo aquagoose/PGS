@@ -30,19 +30,27 @@ from System.IO import Path as _path
 import PRS as _prs
 import abc as _abc
 import math as _math
-from enum import Enum as _enum
+from enum import IntEnum as _enum
+
 
 class Vector2:
     """Represents a 2-dimensional vector, with an x and y position."""
     @staticmethod
     def zero():
+        """Returns a Vector2 with values (0, 0)."""
         return Vector2(0, 0)
 
     @staticmethod
     def one():
+        """Returns a Vector2 with values (1, 1)."""
         return Vector2(1, 1)
 
     def __init__(self, x: float, y: float):
+        """
+        Create a new Vector2.
+        :param x: The x-coordinate.
+        :param y: The y-coordinate.
+        """
         #if (type(x) != float and type(x) != int):
         #    raise TypeError(f"Argument 'x' expected type 'float', got '{type(x).__name__}' instead.")
         #if (type(y) != float and type(y) != int):
@@ -51,12 +59,27 @@ class Vector2:
         self.y: float = y
 
     def __add__(self, other: 'Vector2') -> 'Vector2':
+        """
+        Adds the two x-values, and two y-values, of the Vector2s together.
+        :param other: The Vector2 to add.
+        :return: The added values.
+        """
         return Vector2(self.x + other.x, self.y + other.y)
 
     def __sub__(self, other: 'Vector2') -> 'Vector2':
+        """
+        Subtracts the two x-values, and two y-values, from the Vector2s.
+        :param other: The Vector2 to subtract.
+        :return: The subtracted values.
+        """
         return Vector2(self.x - other.x, self.y - other.y)
 
     def __mul__(self, other) -> 'Vector2':
+        """
+        Multiplies the two x-values, and two y-values, of the Vector2s together.
+        :param other: The Vector2 to multiply.
+        :return: THe multiplied values.
+        """
         if type(other) == Vector2:
             return Vector2(self.x * other.x, self.y * other.y)
         elif type(other) == float or type(other) == int:
@@ -65,12 +88,22 @@ class Vector2:
             raise TypeError(f"unsupported operand type(s) for *: 'Vector2' and '{type(other).__name__}'")
 
     def __rmul__(self, other) -> 'Vector2':
+        """
+        Multiplies the two x-values, and two y-values, of the Vector2s together.
+        :param other: The Vector2 to multiply.
+        :return: The multiplied values.
+        """
         if (type(other) != Vector2 and type(other) != int and type(other) != float):
             raise TypeError(f"unsupported operand type(s) for *: '{type(other).__name__}' and 'Vector2'")
         else:
             return self * other
 
     def __truediv__(self, other) -> 'Vector2':
+        """
+        Divides the two x-values, and two y-values, of the Vector2s together.
+        :param other: The Vector2 to divide.
+        :return: The divided value.
+        """
         if type(other) == Vector2:
             return Vector2(self.x / other.x, self.y / other.y)
         elif type(other) == float or type(other) == int:
@@ -79,33 +112,72 @@ class Vector2:
             raise TypeError(f"unsupported operand type(s) for /: 'Vector2' and '{type(other).__name__}'")
 
     def __floordiv__(self, other) -> 'Vector2':
+        """
+        Divides the two x-values, and two y-values of the Vector2s, and returns as a Vector2 of whole numbers.
+        :param other: The Vector2 to divide.
+        :return: The divided value (as a Vector2 of whole numbers)
+        """
         vec: Vector2 = self / other
         vec.x //= 1
         vec.y //= 1
         return vec
 
     def __neg__(self):
+        """
+        Returns the negated x and y values.
+        :return: The negated x and y values.
+        """
         return Vector2(-self.x, -self.y)
 
     def __str__(self):
+        """
+        Returns this Vector2 as a string value.
+        :return: This Vector2 as a string value.
+        """
         return f"Vector2(x: {self.x}, y: {self.y})"
 
     @staticmethod
     def lerp(value1: 'Vector2', value2: 'Vector2', amount: float) -> 'Vector2':
+        """
+        Linearly interpolate between two Vector2s with the given amount (0-1).
+        :param value1: The first Vector2.
+        :param value2: The second Vector2.
+        :param amount: The amount to lerp by. This value should be between 0 and 1, however can be outside those values.
+        :return: The lerped Vector2.
+        """
         lerp_val = _mg.Vector2.Lerp(_mg.Vector2(float(value1.x), float(value1.y)), _mg.Vector2(float(value2.x), float(value2.y)), float(amount))
         return Vector2(lerp_val.X, lerp_val.Y)
 
+
 class Size:
+    """Represents a set of two values corresponding to width and height."""
+
     def __init__(self, width: int, height: int):
+        """
+        Create a new Size with the given width and height.
+        :param width: The width of the Size.
+        :param height: The height of the Size.
+        """
         self.width: int = width
         self.height: int = height
 
     def to_vector2(self) -> Vector2:
+        """
+        Get this size as a Vector2 value.
+        :return: A Vector2 with the x value as the width and the y value as the height.
+        """
         return Vector2(self.width, self.height)
 
+
 class Matrix:
+    """Represents a 4x4 matrix, used for 2D and 3D transformations."""
+
     @staticmethod
     def identity():
+        """
+        Get the identity matrix.
+        :return: A matrix with values (1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+        """
         return Matrix(1, 0, 0, 0,
                       0, 1, 0, 0,
                       0, 0, 1, 0,
@@ -113,6 +185,25 @@ class Matrix:
 
     def __init__(self, m11: float, m12: float, m13: float, m14: float, m21: float, m22: float, m23: float, m24: float,
                  m31: float, m32: float, m33: float, m34: float, m41: float, m42: float, m43: float, m44: float):
+        """
+        Creates a new 4x4 matrix.
+        :param m11: Column 1, row 1, of the matrix.
+        :param m12: Column 1, row 2, of the matrix.
+        :param m13: Column 1, row 3, of the matrix.
+        :param m14: Column 1, row 4, of the matrix.
+        :param m21: Column 2, row 1, of the matrix.
+        :param m22: Column 2, row 2, of the matrix.
+        :param m23: Column 2, row 3, of the matrix.
+        :param m24: Column 2, row 4, of the matrix.
+        :param m31: Column 3, row 1, of the matrix.
+        :param m32: Column 3, row 2, of the matrix.
+        :param m33: Column 3, row 3, of the matrix.
+        :param m34: Column 3, row 4, of the matrix.
+        :param m41: Column 4, row 1, of the matrix.
+        :param m42: Column 4, row 2, of the matrix.
+        :param m43: Column 4, row 3, of the matrix.
+        :param m44: Column 4, row 4, of the matrix.
+        """
         self.m11: float = m11
         self.m12: float = m12
         self.m13: float = m13
@@ -132,17 +223,37 @@ class Matrix:
 
     @staticmethod
     def transform(value: Vector2) -> 'Matrix':
+        """
+        Create a tranformation matrix with the given Vector2.
+        :param value: The Vector2 to create the tranformation matrix with.
+        :return: The transformation matrix.
+        """
         return Matrix._to_pgs_matrix(_mg.Matrix.CreateTranslation(float(value.x), float(value.y), float(0)))
 
     @staticmethod
     def rotate(value: float) -> 'Matrix':
+        """
+        Create a rotation matrix with the given rotation in radians.
+        :param value: The value in radians to create the rotation matrix.
+        :return: The rotation matrix.
+        """
         return Matrix._to_pgs_matrix(_mg.Matrix.CreateRotationZ(value))
 
     @staticmethod
     def scale(value: Vector2) -> 'Matrix':
+        """
+        Create a scale matrix with the given scale Vector2.
+        :param value: The Vector2 to create a scale matrix with.
+        :return: The scale matrix.
+        """
         return Matrix._to_pgs_matrix(_mg.Matrix.CreateScale(_mg.Vector3(float(value.x), float(value.y), float(1))))
 
     def __mul__(self, other: 'Matrix') -> 'Matrix':
+        """
+        Multiply two matrices together.
+        :param other: The matrix to multiply with.
+        :return: The multiplied matrix.
+        """
         return Matrix._to_pgs_matrix(_mg.Matrix.Multiply(self._to_mg_matrix(), other._to_mg_matrix()))
 
 
@@ -159,7 +270,15 @@ class Matrix:
 
 
 class Color:
+    """Represents a Color with given red, green, blue, and alpha values."""
     def __init__(self, r: int, g: int, b: int, a: int = 255):
+        """
+        Create a new Color with the given red, green, blue, and optional alpha values.
+        :param r: The red value of the Color.
+        :param g: The green value of the Color.
+        :param b: The blue value of the Color.
+        :param a: The alpha value of the Color.
+        """
         self.r: int = r
         self.g: int = g
         self.b: int = b
@@ -167,12 +286,20 @@ class Color:
 
     @staticmethod
     def from_hex(hex_value: int):
+        """
+        Create a new Color with the given 24-bit RGB hexadecimal value.
+        :param hex_value: The given 24-bit RGB integer.
+        :return: The Color.
+        """
         return Color(hex_value >> 16, (hex_value & 0xFF00) >> 8, hex_value & 255)
 
 
 # From https://developer.mozilla.org/en-US/docs/Web/CSS/color_value
 # Colors enum. Defines a list of commonly used colors.
 class Colors:
+    """
+    Defines a list of commonly used colors.
+    """
     ALICE_BLUE = Color.from_hex(0xF0F8FF)
     ANTIQUE_WHITE = Color.from_hex(0xFAEBD7)
     AQUA = Color.from_hex(0x00FFFF)
@@ -323,12 +450,23 @@ class Colors:
     YELLOW_GREEN = Color.from_hex(0x9ACD32)
     TRANSPARENT = Color(0, 0, 0, 0)
 
+
 class Texture:
+    """Represents a 2D texture."""
+
     @property
     def size(self) -> Size:
+        """
+        Get the total size in pixels of this texture.
+        :return: The total size in pixels of this texture.
+        """
         return Size(self._texture.Width, self._texture.Height)
 
     def __init__(self, path: str):
+        """
+        Create a new Texture with the given path.
+        :param path: The path of the texture.
+        """
         if (path == "CUSTOM"):
             self._texture = None
         else:
@@ -339,17 +477,31 @@ class Texture:
 
     @staticmethod
     def custom(width: int, height: int):
+        """
+        Create a new Texture with the given width and height.
+        :param width: The width of the texture.
+        :param height: The height of the texture.
+        :return: A blank texture with the given width and height.
+        """
         tex = Texture("CUSTOM")
         tex._texture = _mgGraphics.Texture2D(_GameBackend.graphics_device, width, height)
         return tex
 
     def set_pixels(self, data: list[Color]):
+        """
+        Set the pixels of this Texture. This expects a Color array.
+        :param data: The Color array.
+        """
         colors = []
         for i in range(len(data)):
             colors.append(_mg.Color(data[i].r, data[i].g, data[i].b, data[i].a))
         _prs.PGSUtils.SetTexturePixels(self._texture, colors)
 
+
 class SpriteBase(_abc.ABC):
+    """Represents the base class of a Sprite object. This includes all attributes a sprite will need barring Texture.
+    This class cannot be instantiated."""
+
     def __init__(self):
         self.position: Vector2 = Vector2.zero()
         self.rotation: float = 0
@@ -360,6 +512,7 @@ class SpriteBase(_abc.ABC):
     @_abc.abstractmethod
     def _draw(self, spriteBatch):
         pass
+
 
 class Sprite(SpriteBase):
     def __init__(self, texture: Texture, position: Vector2):
@@ -383,6 +536,7 @@ class Sprite(SpriteBase):
             _mgGraphics.SpriteEffects(0), float(0))
 
 class PixelMode(_enum):
+    """Set the pixel mode for the SpriteDrawer to draw with."""
     Linear = 0
     Clamp = 1
 
@@ -444,8 +598,22 @@ class SpriteDrawer:
             self.__statics[sprite]._draw(self.__spriteBatch)
         self.__spriteBatch.End()
 
+    def draw_render_target(self, render_target: 'RenderTarget', position: Vector2, color: Color = Colors.WHITE, origin: Vector2 = Vector2.zero(),
+                    scale: Vector2 = Vector2.one(), rotation: float = 0,):
+        self.__spriteBatch.Draw(render_target._framebuffer, _mg.Vector2(float(position.x), float(position.y)), None,
+            _mg.Color(color.r, color.g, color.b, color.a), float(rotation), _mg.Vector2(float(origin.x), float(origin.y)),
+            _mg.Vector2(float(scale.x), float(scale.y)), _mgGraphics.SpriteEffects(0), float(0))
+
 class DrawError(Exception):
     pass
+
+
+class RenderTarget:
+    """Represents a Framebuffer that can be rendered to."""
+
+    def __init__(self, size: Size):
+        self._framebuffer = _mgGraphics.RenderTarget2D(_GameBackend.graphics_device, size.width, size.height)
+
 
 class _FontManager:
     __fonts: dict[str, _fontStash.FontSystem] = {}
@@ -485,8 +653,6 @@ class _GameBackend(_prs.PGSGame):
         self.graphics.SynchronizeWithVerticalRetrace = vsync
         self.IsFixedTimeStep = False
 
-        self.Window.KeyDown += Input._set_key_down
-        self.Window.KeyUp += Input._set_key_up
         self.Window.ClientSizeChanged += self.__resize
         self.clear_color = _mg.Color(0, 0, 0)
         self.counter = 0
@@ -584,6 +750,12 @@ class Game:
         self.unload()
         self.__game.Exit()
 
+    def set_render_target(self, render_target: RenderTarget):
+        if (render_target is None):
+            _GameBackend.graphics_device.SetRenderTarget(None)
+        else:
+            _GameBackend.graphics_device.SetRenderTarget(render_target._framebuffer)
+
 
 class PGSMath:
     @staticmethod
@@ -670,33 +842,33 @@ class MouseButtons(_enum):
 
 
 class Input:
-    __keys_held: list = []
-    __new_keys_this_frame: list = []
-
-    __mouse_buttons_held: list = []
-    __new_mouse_buttons_this_frame = []
-
-    __keys_down_queue: list = []
-    __keys_up_queue: list = []
-
     __mouse_state = None
     __last_mouse_state = None
 
+    __keyboard_state = None
+    __last_keyboard_state = None
+
     @staticmethod
     def key_pressed(key: Keys) -> bool:
-        return key in Input.__new_keys_this_frame
+        return Input.__keyboard_state.IsKeyDown(_mgInput.Keys(key)) and not Input.__last_keyboard_state.IsKeyDown(_mgInput.Keys(key))
 
     @staticmethod
     def key_down(key: Keys) -> bool:
-        return key in Input.__keys_held
+        return Input.__keyboard_state.IsKeyDown(_mgInput.Keys(key))
 
     @staticmethod
     def mouse_button_pressed(button: MouseButtons) -> bool:
-        return button in Input.__new_mouse_buttons_this_frame
+        if button == MouseButtons.M_LEFT:
+            return Input.__mouse_state.LeftButton == _mgInput.ButtonState.Pressed and Input.__last_mouse_state.LeftButton != _mgInput.ButtonState.Pressed
+        elif button == MouseButtons.M_RIGHT:
+            return Input.__mouse_state.RightButton == _mgInput.ButtonState.Pressed and Input.__last_mouse_state.RightButton != _mgInput.ButtonState.Pressed
 
     @staticmethod
     def mouse_button_down(button: MouseButtons) -> bool:
-        return button in Input.__mouse_buttons_held
+        if button == MouseButtons.M_LEFT:
+            return Input.__mouse_state.LeftButton == _mgInput.ButtonState.Pressed
+        elif button == MouseButtons.M_RIGHT:
+            return Input.__mouse_state.RightButton == _mgInput.ButtonState.Pressed
 
     @staticmethod
     def mouse_button_up(button: MouseButtons) -> bool:
@@ -714,70 +886,10 @@ class Input:
     @staticmethod
     def _update():
         Input.__last_mouse_state = Input.__mouse_state
-        Input.__new_keys_this_frame.clear()
-        Input.__new_mouse_buttons_this_frame.clear()
-
-        for key in Input.__keys_down_queue:
-            Input.__key_down(key)
-        Input.__keys_down_queue.clear()
-
-        for key in Input.__keys_up_queue:
-            Input.__key_up(key)
-        Input.__keys_up_queue.clear()
+        Input.__last_keyboard_state = Input.__keyboard_state
 
         Input.__mouse_state = _mgInput.Mouse.GetState()
-        if Input.__mouse_state.LeftButton == _mgInput.ButtonState.Pressed:
-            Input.__mouse_down(MouseButtons.M_LEFT)
-        else:
-            Input.__mouse_up(MouseButtons.M_LEFT)
-
-        if Input.__mouse_state.RightButton == _mgInput.ButtonState.Pressed:
-            Input.__mouse_down(MouseButtons.M_RIGHT)
-        else:
-            Input.__mouse_up(MouseButtons.M_RIGHT)
-
-
-    @staticmethod
-    def __key_down(key: Keys):
-        if not key in Input.__keys_held:
-            Input.__keys_held.append(key)
-            Input.__new_keys_this_frame.append(key)
-
-    @staticmethod
-    def __key_up(key: Keys):
-        try:
-            Input.__keys_held.remove(key)
-            if key in Input.__new_keys_this_frame:
-                Input.__new_keys_this_frame.remove(key)
-        except Exception as e:
-            print(e)
-
-    @staticmethod
-    def __mouse_down(button: MouseButtons):
-        if not button in Input.__mouse_buttons_held:
-            Input.__mouse_buttons_held.append(button)
-            Input.__new_mouse_buttons_this_frame.append(button)
-
-    @staticmethod
-    def __mouse_up(button: MouseButtons):
-        if button in Input.__mouse_buttons_held:
-            Input.__mouse_buttons_held.remove(button)
-        if button in Input.__new_mouse_buttons_this_frame:
-            Input.__new_mouse_buttons_this_frame.remove(button)
-
-    @staticmethod
-    def _set_key_down(sender, key):
-        try:
-            Input.__keys_down_queue.append(Keys(key.Key.GetHashCode()))
-        except:
-            pass
-
-    @staticmethod
-    def _set_key_up(sender, key):
-        try:
-            Input.__keys_up_queue.append(Keys(key.Key.GetHashCode()))
-        except:
-            pass
+        Input.__keyboard_state = _mgInput.Keyboard.GetState()
 
 
 class Time:

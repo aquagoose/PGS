@@ -24,6 +24,8 @@ class RacingGame(Game):
 
         RacingGame.screen_size = self.window_size
 
+        self.rendert = RenderTarget(Size(200, 200))
+
     def update(self):
         if Input.key_pressed(Keys.K_G):
             if self.fullscreen:
@@ -115,6 +117,7 @@ class MainScene(Scene):
         self.player = Player(Sprite(self.game.assets["racecar"], Vector2(100, 0)))
 
         self.highway: Highway = Highway(Sprite(self.game.assets["highway"], Vector2(0, 0)))
+        self.ai: CarAI = CarAI(self.game.assets["racecar"])
 
         self.speed_label = Label(self.ui_manager, Position(DockType.BOTTOM_LEFT, Vector2(0, -50)), Colors.WHITE, "0")
         self.speed_label.position.offset = Vector2(0, -self.speed_label.screen_size.height)
@@ -127,11 +130,13 @@ class MainScene(Scene):
         self.speed_label.text = f"{int(self.player.speed)} km/h"
         self.camera.position = Vector2(self.player.sprite.position.x - 100, -self.game.window_size.height / 2)
         self.highway.update(self.camera.position)
+        self.ai.update()
 
     def draw(self):
         self.sprite_drawer.start(self.camera.transform_matrix)
 
         self.highway.draw(self.sprite_drawer)
+        self.ai.draw(self.sprite_drawer)
         self.player.draw(self.sprite_drawer)
 
         self.sprite_drawer.end()
@@ -213,6 +218,9 @@ class Player(Entity):
         self.sprite.position += self.velocity * self.forward * Time.delta_time()
         self.sprite.position.y = PGSMath.clamp(self.sprite.position.y, -245, 250)
 
+        if Input.mouse_button_down(MouseButtons.M_LEFT):
+            print("Presse")
+
     def draw(self, sprite_drawer: SpriteDrawer):
         sprite_drawer.draw_sprite(self.sprite)
 
@@ -234,6 +242,9 @@ class Highway:
             self.roads[i].position += Vector2(i * self.road_sprite.texture.size.height, 0)
 
     def update(self, camera_position: Vector2):
+        if camera_position.x >= self.roads[len(self.roads) - 1].position.x + self.roads[len(self.roads) - 1].texture.size.height:
+            for i in range(len(self.roads)):
+                self.roads[i].position = Vector2(camera_position.x + (i * self.roads[i].texture.size.height), 0)
         if camera_position.x >= self.roads[0].position.x + self.roads[0].texture.size.height:
             self.roads[0].position = Vector2(self.roads[len(self.roads) - 1].position.x + self.roads[len(self.roads) - 1].texture.size.height, 0)
             road0 = self.roads[0]
@@ -244,6 +255,21 @@ class Highway:
     def draw(self, sprite_drawer: SpriteDrawer):
         for road in self.roads:
             sprite_drawer.draw_sprite(road)
+
+
+class CarAI:
+    SPEED = 200
+
+    def __init__(self, texture: Texture):
+        self.car_sprite = Sprite(texture, RacingGame.screen_size.to_vector2())
+        self.car_sprite.scale = Vector2(0.15, 0.15)
+        self.car_sprite.rotation = PGSMath.degrees_to_radians(180)
+
+    def update(self):
+        pass
+
+    def draw(self, sprite_drawer: SpriteDrawer):
+        sprite_drawer.draw_sprite(self.car_sprite)
 
 
 if __name__ == "__main__":
