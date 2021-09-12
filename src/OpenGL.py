@@ -7,11 +7,14 @@
 # This version is the in-development version of the PGS using
 # an OpenGL renderer backend.
 # Some PGS features may not be supported.
+import sys
 
 import OpenGL.GL as _gl
 import glfw as _glfw
 import abc as _abc
+from PIL import Image as _img
 from enum import IntEnum as _enum
+import sys as _sys
 
 
 class Vector2:
@@ -29,6 +32,7 @@ class Vector2:
     def __init__(self, x: float, y: float):
         """
         Create a new Vector2.
+
         :param x: The x-coordinate.
         :param y: The y-coordinate.
         """
@@ -42,6 +46,7 @@ class Vector2:
     def __add__(self, other: 'Vector2') -> 'Vector2':
         """
         Adds the two x-values, and two y-values, of the Vector2s together.
+
         :param other: The Vector2 to add.
         :return: The added values.
         """
@@ -50,6 +55,7 @@ class Vector2:
     def __sub__(self, other: 'Vector2') -> 'Vector2':
         """
         Subtracts the two x-values, and two y-values, from the Vector2s.
+
         :param other: The Vector2 to subtract.
         :return: The subtracted values.
         """
@@ -58,6 +64,7 @@ class Vector2:
     def __mul__(self, other) -> 'Vector2':
         """
         Multiplies the two x-values, and two y-values, of the Vector2s together.
+
         :param other: The Vector2 to multiply.
         :return: THe multiplied values.
         """
@@ -71,6 +78,7 @@ class Vector2:
     def __rmul__(self, other) -> 'Vector2':
         """
         Multiplies the two x-values, and two y-values, of the Vector2s together.
+
         :param other: The Vector2 to multiply.
         :return: The multiplied values.
         """
@@ -82,6 +90,7 @@ class Vector2:
     def __truediv__(self, other) -> 'Vector2':
         """
         Divides the two x-values, and two y-values, of the Vector2s together.
+
         :param other: The Vector2 to divide.
         :return: The divided value.
         """
@@ -95,6 +104,7 @@ class Vector2:
     def __floordiv__(self, other) -> 'Vector2':
         """
         Divides the two x-values, and two y-values of the Vector2s, and returns as a Vector2 of whole numbers.
+
         :param other: The Vector2 to divide.
         :return: The divided value (as a Vector2 of whole numbers)
         """
@@ -106,6 +116,7 @@ class Vector2:
     def __neg__(self):
         """
         Returns the negated x and y values.
+
         :return: The negated x and y values.
         """
         return Vector2(-self.x, -self.y)
@@ -113,6 +124,7 @@ class Vector2:
     def __str__(self):
         """
         Returns this Vector2 as a string value.
+
         :return: This Vector2 as a string value.
         """
         return f"Vector2(x: {self.x}, y: {self.y})"
@@ -121,6 +133,7 @@ class Vector2:
     #def lerp(value1: 'Vector2', value2: 'Vector2', amount: float) -> 'Vector2':
     #    """
     #    Linearly interpolate between two Vector2s with the given amount (0-1).
+
     #    :param value1: The first Vector2.
     #    :param value2: The second Vector2.
     #    :param amount: The amount to lerp by. This value should be between 0 and 1, however can be outside those values.
@@ -136,6 +149,7 @@ class Size:
     def __init__(self, width: int, height: int):
         """
         Create a new Size with the given width and height.
+
         :param width: The width of the Size.
         :param height: The height of the Size.
         """
@@ -145,6 +159,7 @@ class Size:
     def to_vector2(self) -> Vector2:
         """
         Get this size as a Vector2 value.
+
         :return: A Vector2 with the x value as the width and the y value as the height.
         """
         return Vector2(self.width, self.height)
@@ -160,6 +175,7 @@ class Matrix:
     def identity():
         """
         Get the identity matrix.
+
         :return: A matrix with values (1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
         """
         return Matrix(1, 0, 0, 0,
@@ -171,6 +187,7 @@ class Matrix:
                  m31: float, m32: float, m33: float, m34: float, m41: float, m42: float, m43: float, m44: float):
         """
         Creates a new 4x4 matrix.
+
         :param m11: Column 1, row 1, of the matrix.
         :param m12: Column 1, row 2, of the matrix.
         :param m13: Column 1, row 3, of the matrix.
@@ -209,6 +226,7 @@ class Matrix:
     #def transform(value: Vector2) -> 'Matrix':
     #    """
     #    Create a tranformation matrix with the given Vector2.
+
     #    :param value: The Vector2 to create the tranformation matrix with.
     #    :return: The transformation matrix.
     #    """
@@ -218,6 +236,7 @@ class Matrix:
     #def rotate(value: float) -> 'Matrix':
     #    """
     #    Create a rotation matrix with the given rotation in radians.
+
     #    :param value: The value in radians to create the rotation matrix.
     #    :return: The rotation matrix.
     #    """
@@ -227,6 +246,7 @@ class Matrix:
     #def scale(value: Vector2) -> 'Matrix':
     #    """
     #    Create a scale matrix with the given scale Vector2.
+
     #    :param value: The Vector2 to create a scale matrix with.
     #    :return: The scale matrix.
     #    """
@@ -235,6 +255,7 @@ class Matrix:
     #def __mul__(self, other: 'Matrix') -> 'Matrix':
     #    """
     #    Multiply two matrices together.
+
     #    :param other: The matrix to multiply with.
     #    :return: The multiplied matrix.
     #    """
@@ -258,6 +279,7 @@ class Color:
     def __init__(self, r: int, g: int, b: int, a: int = 255):
         """
         Create a new Color with the given red, green, blue, and optional alpha values.
+
         :param r: The red value of the Color.
         :param g: The green value of the Color.
         :param b: The blue value of the Color.
@@ -272,6 +294,7 @@ class Color:
     def from_hex(hex_value: int):
         """
         Create a new Color with the given 24-bit RGB hexadecimal value.
+
         :param hex_value: The given 24-bit RGB integer.
         :return: The Color.
         """
@@ -444,8 +467,26 @@ class Disposable(_abc.ABC):
     def dispose(self):
         pass
 
-class Texture:
-    pass
+class Texture(Disposable):
+    def __init__(self, path: str):
+        self.__handle = _gl.glGenTextures(1)
+        _gl.glActiveTexture(_gl.GL_TEXTURE0)
+        _gl.glBindTexture(_gl.GL_TEXTURE_2D, self.__handle)
+
+        img = _img.open(path)
+
+        btes = img.tobytes()
+        _gl.glTexImage2D(_gl.GL_TEXTURE_2D, 0, _gl.GL_RGBA, img.width, img.height, 0, _gl.GL_RGBA, _gl.GL_UNSIGNED_BYTE, btes)
+
+        img.close()
+
+    def _bind(self):
+        _gl.glActiveTexture(_gl.GL_TEXTURE0)
+        _gl.glBindTexture(_gl.GL_TEXTURE_2D, self.__handle)
+
+    def dispose(self):
+        #_gl.glDeleteTextures(1, [self.__handle])
+        pass
 
 
 class Shader(Disposable):
@@ -456,15 +497,16 @@ class Shader(Disposable):
     def __init__(self, vertex: str, fragment: str):
         """
         Create a new shader.
+
         :param vertex: The vertex shader.
         :param fragment: The fragment shader.
         """
         vertex_shader = _gl.glCreateShader(_gl.GL_VERTEX_SHADER)
-        _gl.glShaderSource(vertex_shader, 1, vertex, None)
+        _gl.glShaderSource(vertex_shader, vertex)
         self.__compile_shader(vertex_shader)
 
         fragment_shader = _gl.glCreateShader(_gl.GL_FRAGMENT_SHADER)
-        _gl.glShaderSource(fragment_shader, 1, fragment, None)
+        _gl.glShaderSource(fragment_shader, fragment)
         self.__compile_shader(fragment_shader)
 
         self.__handle = _gl.glCreateProgram()
@@ -473,8 +515,8 @@ class Shader(Disposable):
         self.__link_program(self.__handle)
         _gl.glDetachShader(self.__handle, vertex_shader)
         _gl.glDetachShader(self.__handle, fragment_shader)
-        _gl.glDeleteShader(self.__handle, vertex_shader)
-        _gl.glDeleteShader(self.__handle, fragment_shader)
+        _gl.glDeleteShader(vertex_shader)
+        _gl.glDeleteShader(fragment_shader)
 
         self.__uniform_locations = {}
         num_uniforms = 0
@@ -488,24 +530,22 @@ class Shader(Disposable):
     def __compile_shader(self, shader):
         _gl.glCompileShader(shader)
 
-        status = None
-        _gl.glGetShaderiv(shader, _gl.GL_COMPILE_STATUS, status)
-        if status != 1:
-            raise Exception(f"Error compiling shader '{shader}'.\n\n{_gl.glGetShaderInfoLog(shader, None)}")
+        status = _gl.glGetShaderiv(shader, _gl.GL_COMPILE_STATUS)
+        if status != _gl.GL_TRUE:
+            raise Exception(f"Error compiling shader '{shader}'.\n\n{_gl.glGetShaderInfoLog(shader)}")
 
     def __link_program(self, program):
         _gl.glLinkProgram(program)
 
-        status = None
-        _gl.glGetProgramiv(program, _gl.GL_LINK_STATUS, status)
-        if status != 1:
-            raise Exception(f"Error linking program '{program}'.\n\n{_gl.glGetProgramInfoLog(program, None)}")
+        status = _gl.glGetProgramiv(program, _gl.GL_LINK_STATUS)
+        if status != _gl.GL_TRUE:
+            raise Exception(f"Error linking program '{program}'.\n\n{_gl.glGetProgramInfoLog(program)}")
 
     def set_uniform(self, uniform_name, value):
         name = self.__get_uniform_location(uniform_name)
 
         if type(value) == bool:
-            _gl.glUniform1i(name, 1 if value == True else 0)
+            _gl.glUniform1i(name, 1 if value else 0)
         elif type(value) == int:
             _gl.glUniform1i(name, value)
         elif type(value) == float:
@@ -514,6 +554,12 @@ class Shader(Disposable):
             _gl.glUniform2f(name, value.x, value.y)
         #elif type(value) == Matrix:
             #_gl.glUniformMatrix4fv(name, 1, True, )
+
+    def _use(self):
+        _gl.glUseProgram(self.__handle)
+
+    def _get_attrib_location(self, name: str) -> int:
+        return _gl.glGetAttribLocation(self.__handle, name)
 
     def __get_uniform_location(self, name):
         if name not in self.__uniform_locations:
@@ -543,7 +589,8 @@ class SpriteDrawer:
     
     void main()
     {
-        gl_Position = vec4(aPosition, 0.0, 1.0) * uModel * uView * uProjection;
+        //gl_Position = vec4(aPosition, 0.0, 1.0) * uModel * uTransform * uProjection;
+        gl_Position = vec4(aPosition, 0.0, 1.0);
         frag_texCoords = aTexCoords;
     }"""
 
@@ -560,11 +607,51 @@ class SpriteDrawer:
     
     void main()
     {
-        out_color = texture(uTexture, frag_texCoords) * uColor;
+        //out_color = texture(uTexture, frag_texCoords) * uColor;
+        out_color = vec4(1, 1, 0, 0);
     }"""
 
+    __VERTICES = [1.0, 1.0, 1.0, 0.0,
+                  1.0, -1.0, 1.0, 1.0,
+                  -1.0, -1.0, 0.0, 1.0,
+                  -1.0, 1.0, 0.0, 0.0]
+    __INDICES = [0, 1, 3, 1, 2, 3]
+
     def __init__(self):
-        pass
+
+        self.__vao = _gl.glGenVertexArrays(1)
+        print(self.__vao)
+        _gl.glBindVertexArray(self.__vao)
+
+        self.__vbo = _gl.glGenBuffers(1)
+        _gl.glBindBuffer(_gl.GL_ARRAY_BUFFER, self.__vbo)
+        _gl.glBufferData(_gl.GL_ARRAY_BUFFER, len(SpriteDrawer.__VERTICES),
+                         (_gl.GLfloat*len(SpriteDrawer.__VERTICES))(*SpriteDrawer.__VERTICES), _gl.GL_STATIC_DRAW)
+
+        self.__ebo = _gl.glGenBuffers(1)
+        _gl.glBindBuffer(_gl.GL_ELEMENT_ARRAY_BUFFER, self.__ebo)
+        _gl.glBufferData(_gl.GL_ELEMENT_ARRAY_BUFFER, len(SpriteDrawer.__INDICES),
+                         (_gl.GLuint*len(SpriteDrawer.__INDICES))(*SpriteDrawer.__INDICES), _gl.GL_STATIC_DRAW)
+
+        self.__shader = Shader(SpriteDrawer.__SPRITE_VERT, SpriteDrawer.__SPRITE_FRAG)
+        self.__shader._use()
+
+        vertex_location = self.__shader._get_attrib_location("aPosition")
+        _gl.glEnableVertexAttribArray(vertex_location)
+        _gl.glVertexAttribPointer(vertex_location, 2, _gl.GL_FLOAT, _gl.GL_FALSE, 4 * 24, 0)
+
+        #ex_coords_location = self.__shader._get_attrib_location("aTexCoords")
+        #_gl.glEnableVertexAttribArray(tex_coords_location)
+        #_gl.glVertexAttribPointer(vertex_location, 2, _gl.GL_FLOAT, _gl.GL_FALSE, 4 * _sys.getsizeof(float),
+        #                          2 * _sys.getsizeof(float))
+
+    def draw(self, texture):
+        texture._bind()
+        self.__shader._use()
+
+        _gl.glBindVertexArray(self.__vao)
+
+        _gl.glDrawElements(_gl.GL_TRIANGLES, len(SpriteDrawer.__INDICES), _gl.GL_UNSIGNED_INT, 0)
 
 
 class DrawError:
@@ -602,6 +689,7 @@ class Game:
         _glfw.window_hint(_glfw.RESIZABLE, _glfw.TRUE if self.__resizable else _glfw.FALSE)
         self.__window = _glfw.create_window(self.__width, self.__height, self.__title, None, None)
         _glfw.set_key_callback(self.__window, Input._key_callback)
+        _glfw.set_mouse_button_callback(self.__window, Input._mouse_callback)
 
         mode = _glfw.get_video_mode(_glfw.get_primary_monitor())
         size = mode[0]
@@ -651,10 +739,93 @@ class Game:
 
 
 class PGSMath:
-    pass
+    @staticmethod
+    def pi():
+        """
+        Get the value of pi.
+        """
+        return 3.1415926535897931
+
+    @staticmethod
+    def degrees_to_radians(degrees: float) -> float:
+        """
+        Convert the specified degrees to radians. Radians are used extensively by the sprite drawer, so you will need to call this often.
+
+        :param degrees: The degrees to convert to radians.
+        """
+        return degrees * (PGSMath.pi() / 180)
+
+    @staticmethod
+    def radians_to_degrees(radians: float) -> float:
+        """
+        Convert the specified radians to degrees.
+
+        :param radians: The radians to convert into degrees.
+        """
+        return radians * (180 / PGSMath.pi())
+
+    @staticmethod
+    def clamp(value: float, min: float, max: float) -> float:
+        """
+        Clamp a value between the min and the max values. It cannot exceed these values.
+
+        :param value: The value to clamp.
+        :param min: The minimum value the given value can be.
+        :param max: The maximum value the given value can be.
+        """
+        if value <= min:
+            return min
+        elif value >= max:
+            return max
+        else:
+            return value
+
+    @staticmethod
+    def max(value1: float, value2: float) -> float:
+        """
+        Returns the greater value of the two given values. If value1 is greater than value2, value1 will be returned.
+        The same applies for the other way round.
+
+        :param value1: The first value.
+        :param value2: The second value.
+        """
+        return value1 if value1 > value2 else value2
+
+    @staticmethod
+    def min(value1: float, value2: float) -> float:
+        """
+        Returns the lesser value of the two given values. If value1 is less than value2, value1 will be returned.
+        The same applies for the other way round.
+
+        :param value1: The first value.
+        :param value2: The second value.
+        """
+        return value1 if value1 < value2 else value2
+
+    @staticmethod
+    def lerp(value1: float, value2: float, amount: float) -> float:
+        """
+        Linearly interpolate between two values by the given amount (multiplier).
+
+        An amount of:
+
+        0 = Value 1 will be returned
+
+        0.5 = Halfway between value 1 and value 2 will be returned.
+
+        1 = Value 2 will be returned.
+
+        :param value1: The first value.
+        :param value2: The second value.
+        :param amount: The amount to lerp by.
+        """
+        return value1 + amount * (value2 - value1)
 
 
 class Keys(_enum):
+    """
+    Represents a list of keys.
+    """
     K_SPACE = 32
 
     K_APOSTROPHE = 39
@@ -756,66 +927,148 @@ class Keys(_enum):
 class MouseButtons(_enum):
     M_LEFT = 0
     M_RIGHT = 1
+    M_MIDDLE = 2
 
 
 class Input:
     __keys_held = []
     __new_keys_this_frame = []
 
+    __mouse_down = []
+    __new_mouse_this_frame = []
+
     __keys_down_queue = []
     __keys_up_queue = []
 
-    __mouse_pos = None
+    __mouse_down_queue = []
+    __mouse_up_queue = []
+
+    __mouse_position = None
 
     @staticmethod
     def key_pressed(key: Keys) -> bool:
+        """
+        Returns true if the given key is pressed in this current frame. This will only be fired once.
+        """
         return key in Input.__new_keys_this_frame
 
     @staticmethod
     def key_down(key: Keys) -> bool:
+        """
+        Returns true the entire time this key is held down.
+        """
         return key in Input.__keys_held
 
     @staticmethod
     def key_up(key: Keys) -> bool:
+        """
+        Returns true whenever this key is NOT being held down.
+        """
         return not Input.key_down(key)
 
     @staticmethod
     def mouse_position() -> Vector2:
-        return Input.__mouse_pos
+        """
+        Get the position of the mouse cursor relative to the top left side of the window.
+        """
+        return Input.__mouse_position
+
+    @staticmethod
+    def mouse_button_pressed(button: MouseButtons) -> bool:
+        """
+        Returns true if the given button is pressed in this current frame. This will only be fired once.
+        """
+        return button in Input.__new_mouse_this_frame
+
+    @staticmethod
+    def mouse_button_down(button: MouseButtons) -> bool:
+        """
+        Returns true the entire time this button is held down.
+        """
+        return button in Input.__mouse_down
+
+    @staticmethod
+    def mouse_button_up(button: MouseButtons) -> bool:
+        """
+        Returns true whenever this mouse button is NOT held down.
+        """
+        return not Input.mouse_button_down(button)
 
     @staticmethod
     def _update(window):
+        # Clear our mouse buttons each frame, meaning that the button will only be in the list for one frame.
         Input.__new_keys_this_frame.clear()
+        Input.__new_mouse_this_frame.clear()
 
+        # Loop through the list of keys/buttons in our loop and set them as up or down accordingly.
+        # They will then be either added or removed to the keys_down/mouse_down list.
         for key in Input.__keys_down_queue:
-            if key not in Input.__keys_held:
-                Input.__key_down(key)
+            Input.__key_down(key)
 
         for key in Input.__keys_up_queue:
-            if key in Input.__keys_held:
-                Input.__key_up(key)
+            Input.__key_up(key)
 
+        # Clear the queues as we no longer need the information in them.
         Input.__keys_down_queue.clear()
         Input.__keys_up_queue.clear()
 
+        # Same as keys
+        for button in Input.__mouse_down_queue:
+            Input.__mouse_button_down(button)
+
+        for button in Input.__mouse_up_queue:
+            Input.__mouse_button_up(button)
+
+        Input.__mouse_down_queue.clear()
+        Input.__mouse_up_queue.clear()
+
+        # Get the mouse position as an integer vec2.
         mpos = _glfw.get_cursor_pos(window)
-        print(mpos)
-        Input.__mouse_position = Vector2(mpos[0], mpos[1])
+        Input.__mouse_position = Vector2(int(mpos[0]), int(mpos[1]))
 
     @staticmethod
     def _key_callback(window, key, scancode, action, mods):
+        # 1 is pressed, 0 is released, 2 is held, but we don't need that one.
         if action == 1:
             Input.__keys_down_queue.append(Keys(key))
         elif action == 0:
             Input.__keys_up_queue.append(Keys(key))
 
     @staticmethod
+    def _mouse_callback(window, button, action, mods):
+        if action == 1:
+            Input.__mouse_down_queue.append(MouseButtons(button))
+        elif action == 0:
+            Input.__mouse_up_queue.append(MouseButtons(button))
+
+    @staticmethod
     def __key_down(key: Keys):
+        # The key shouldn't be in there, but if it is ignore it.
+        # Append the key to both the keys_held, and new_keys lists.
+        # The new_keys list will be cleared on the next frame so it will only be fired for one frame.
         if key not in Input.__keys_held:
             Input.__keys_held.append(key)
             Input.__new_keys_this_frame.append(key)
 
     @staticmethod
     def __key_up(key: Keys):
+        # Remove it from the keys_held list. The new_keys list will have been cleared at this point anyway.
         if key in Input.__keys_held:
             Input.__keys_held.remove(key)
+
+    @staticmethod
+    def __mouse_button_down(button: MouseButtons):
+        # Same as key_down.
+        if button not in Input.__mouse_down:
+            Input.__mouse_down.append(button)
+            Input.__new_mouse_this_frame.append(button)
+
+    @staticmethod
+    def __mouse_button_up(button: MouseButtons):
+        # Same as key_up.
+        if button in Input.__mouse_down:
+            Input.__mouse_down.remove(button)
+
+
+class Time:
+    pass

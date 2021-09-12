@@ -176,11 +176,11 @@ class Camera:
 
 
 class Player(Entity):
-    MAX_SPEED = 200000
-    ACCELERATION = 200
+    MAX_SPEED = 200000000
+    ACCELERATION = 200000000
     DECELERATION = 100
     BRAKING = 500
-    MAX_SPEED_KMH = 30000
+    MAX_SPEED_KMH = 30000000
 
     TURNING_SPEED = 1.2
 
@@ -275,4 +275,4 @@ class CarAI:
 if __name__ == "__main__":
     game = RacingGame(1280, 720, "Racing Game Example", resizable=True)
 
-    game.run()
+    game.run(60)
